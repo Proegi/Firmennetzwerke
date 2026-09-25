@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firmennetzwerke</title>
+<!-- Loesung: Firmennetzwerke_Loesung.md -->
+<style>
+:root{
+  --paper:#E4E6E1; --card:#FAFAF8; --card-2:#F1F2EE;
+  --ink:#15181B; --ink-2:#5C6169; --ink-3:#8A8F95;
+  --line:#C7CAC3; --line-2:#DEE0DA;
+  --pink:#D6437E; --ok:#1E6B4F; --warn:#9E6A12; --bad:#B32C22;
+  --mono:"IBM Plex Mono","JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:28px 18px 60px;
+  background:
+    repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(21,24,27,.03) 6px,rgba(21,24,27,.03) 7px),
+    var(--paper);
+  color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.55;
+}
+.wrap{max-width:940px;margin:0 auto}
+
+header.sheet{
+  background:var(--card); border:1px solid var(--ink); box-shadow:5px 5px 0 rgba(21,24,27,.14);
+  padding:20px 22px; margin-bottom:18px;
+}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--pink)}
+header.sheet h1{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:26px;margin:6px 0 0}
+
+.notice{
+  border:1px solid var(--line); border-left:4px solid var(--warn); background:var(--card);
+  padding:12px 16px; margin-bottom:26px; font-size:14px; color:var(--ink-2);
+}
+
+section.card{
+  background:var(--card); border:1px solid var(--ink); box-shadow:5px 5px 0 rgba(21,24,27,.14);
+  padding:20px 22px; margin-bottom:24px;
+}
+.head{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line-2);padding-bottom:10px;margin-bottom:16px}
+.num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--card);background:var(--ink);padding:4px 9px;white-space:nowrap}
+.head h2{font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:17px;margin:0}
+.head .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--pink);margin-left:auto;white-space:nowrap}
+p{margin:0 0 12px}
+ol,ul{margin:0 0 12px;padding-left:22px}
+li{margin-bottom:6px}
+.task{margin:22px 0 8px;font-weight:600}
+.task:first-of-type{margin-top:0}
+.task b{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--pink);margin-right:6px}
+
+.stem{font-weight:600;margin:14px 0 6px}
+.stem .n{font-family:var(--mono);font-size:12px;color:var(--pink);margin-right:6px}
+
+.quote{background:var(--card-2);border:1px solid var(--line);border-left:4px solid var(--pink);padding:12px 14px;margin:18px 0 10px;font-style:italic}
+.quote .who{display:block;font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+
+table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+th{background:var(--card-2);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+td.nr{font-family:var(--mono);font-size:12px;color:var(--ink-3);width:44px;text-align:center}
+td.abk{font-family:var(--mono);font-weight:600;width:90px}
+.scroll{overflow-x:auto;margin-bottom:16px}
+.scroll table{margin-bottom:0;min-width:560px}
+
+select{
+  font-family:var(--sans);font-size:14px;color:var(--ink);
+  background:#fff;border:1px solid var(--line-2);padding:6px 8px;width:100%;
+}
+.gap select{width:auto;display:inline-block;padding:3px 6px;margin:0 2px}
+select:focus,.feld:focus{outline:2px solid var(--pink);outline-offset:1px}
+select.ok{border:1px solid var(--ok);box-shadow:inset 3px 0 0 var(--ok)}
+select.bad{border:1px solid var(--bad);box-shadow:inset 3px 0 0 var(--bad)}
+
+.feld{
+  display:block;min-height:64px;width:100%;margin:0 0 14px;padding:3px 8px;
+  font-family:var(--sans);font-size:14px;color:var(--ink);line-height:28px;
+  white-space:pre-wrap;word-wrap:break-word;
+  background:repeating-linear-gradient(var(--card),var(--card) 27px,var(--line-2) 27px,var(--line-2) 28px);
+  background-position:0 3px;
+  border:1px solid var(--line);cursor:text;
+}
+.feld.klein{min-height:36px}
+.feld.gross{min-height:120px}
+.feld:empty::before{content:attr(data-platzhalter);color:var(--ink-3)}
+td .feld{margin:0}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+
+.checkrow{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+button.check{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--ink);color:var(--card);border:1px solid var(--ink);padding:9px 16px;cursor:pointer;
+}
+button.check:hover{background:var(--pink);border-color:var(--pink)}
+.result{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink-2)}
+.result.all-ok{color:var(--ok)}
+
+.gap{line-height:2.3}
+
+.printbar{text-align:center;margin-top:34px}
+button.print{
+  font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--card);color:var(--ink);border:1px solid var(--ink);box-shadow:4px 4px 0 rgba(21,24,27,.14);
+  padding:14px 26px;cursor:pointer;
+}
+button.print:hover{background:var(--ink);color:var(--card)}
+
+@media (max-width:720px){
+  .grid2{grid-template-columns:1fr}
+  .head{flex-wrap:wrap}
+  .head .tag{margin-left:0}
+}
+
+@media print{
+  @page{margin:14mm}
+  body{background:#fff;padding:0;font-size:11.5pt;line-height:1.4}
+  .wrap{max-width:none}
+  header.sheet,section.card{box-shadow:none;border:1px solid #000;padding:12px 14px;margin-bottom:14px}
+  header.sheet h1{font-size:20pt}
+  .notice,.checkrow,.printbar,button{display:none !important}
+  .feld{background:#fff;border:1px solid #999;color:#000;line-height:1.5;min-height:0}
+  .feld:empty{min-height:40px}
+  .feld:empty::before{content:""}
+  select{border:1px solid #999;box-shadow:none !important;background:#fff}
+  .scroll{overflow:visible}
+  .scroll table{min-width:0}
+  .quote,table,.stem{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="sheet">
+  <div class="kicker">Lernfeld 3</div>
+  <h1>Firmennetzwerke</h1>
+</header>
+
+<div class="notice">
+  Deine Eingaben werden nur lokal in diesem Browser gespeichert. Sichere sie selbst, zum Beispiel über den Button „PDF speichern“ ganz unten, denn beim Löschen der Browserdaten gehen sie verloren.
+</div>
+
+<!-- Aufgabe 1 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 1</span><h2>Informieren</h2></div>
+  <p>Recherchiere im Buch Seite 286-290 (ab der Tabelle „Computernetze unterscheiden“) und ergänzend im Internet zu LAN, VLAN, WAN und VPN.</p>
+  <p>Arbeite die Unterschiede heraus, indem du folgende Sätze vervollständigst:</p>
+
+  <div class="stem"><span class="n">1</span>Ein LAN unterscheidet sich von einem VLAN dadurch, dass …</div>
+  <div class="feld" contenteditable="true" id="a1-1"></div>
+  <div class="stem"><span class="n">2</span>Ein LAN unterscheidet sich von einem WAN dadurch, dass …</div>
+  <div class="feld" contenteditable="true" id="a1-2"></div>
+  <div class="stem"><span class="n">3</span>Ein VLAN unterscheidet sich von einem VPN dadurch, dass …</div>
+  <div class="feld" contenteditable="true" id="a1-3"></div>
+  <div class="stem"><span class="n">4</span>Ein VPN unterscheidet sich von einem LAN dadurch, dass …</div>
+  <div class="feld" contenteditable="true" id="a1-4"></div>
+</section>
+
+<!-- Aufgabe 2 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 2</span><h2>Computernetze unterscheiden</h2></div>
+  <p>Ordne jeder Beschreibung den passenden Begriff zu.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Nr.</th><th>Beschreibung</th><th style="width:28%">Begriff</th></tr>
+      <tr><td class="nr">1</td><td>Die Beschäftigten rufen Speiseplan, Urlaubsanträge und Hausmitteilungen im Browser auf, als wäre es eine Webseite. Wer nicht zur Firma gehört, kommt nicht heran, selbst wenn die Firma über mehrere Standorte verteilt ist.</td>
+        <td><select id="a3-1" data-a="Intranet" data-o="Firmen-LAN|Internet|Intranet|Providernetz|Telefonnetz"></select></td></tr>
+      <tr><td class="nr">2</td><td>Über dieses Netz gelangen die Daten vom Anschluss eines Haushalts oder Betriebs bis zu dem Punkt, an dem sie ins weltweite Netz übergeben werden. Betrieben wird es von dem Unternehmen, mit dem der Anschlussvertrag besteht.</td>
+        <td><select id="a3-2" data-a="Providernetz" data-o="Firmen-LAN|Internet|Intranet|Providernetz|Telefonnetz"></select></td></tr>
+      <tr><td class="nr">3</td><td>Eine E-Mail wird in viele Teile zerlegt, die unabhängig voneinander, eventuell auf unterschiedlichen Wegen, um die Welt laufen und erst beim Empfänger wieder zusammengesetzt werden.</td>
+        <td><select id="a3-3" data-a="Internet" data-o="Firmen-LAN|Internet|Intranet|Providernetz|Telefonnetz"></select></td></tr>
+      <tr><td class="nr">4</td><td>Rechner, Drucker und Server eines Betriebs sind vor Ort miteinander verbunden. Ob dazu ein eigener Serverraum gehört oder nur ein kleiner Switch unter dem Schreibtisch steht, ändert nichts an der Bezeichnung.</td>
+        <td><select id="a3-4" data-a="Firmen-LAN" data-o="Firmen-LAN|Internet|Intranet|Providernetz|Telefonnetz"></select></td></tr>
+      <tr><td class="nr">5</td><td>Solange zwei Personen miteinander sprechen, bleibt zwischen ihnen ein fester Weg reserviert, auch in den Pausen, in denen niemand etwas sagt.</td>
+        <td><select id="a3-5" data-a="Telefonnetz" data-o="Firmen-LAN|Internet|Intranet|Providernetz|Telefonnetz"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<!-- Aufgabe 3 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 3</span><h2>Private und öffentliche Netze</h2></div>
+
+  <p class="task"><b>a)</b> Nenne Merkmale, an denen du ein öffentliches Netz von einem privaten Netz unterscheidest.</p>
+  <div class="feld gross" contenteditable="true" id="a4a"></div>
+
+  <p class="task"><b>b)</b> Ergänze für jede Abkürzung die ausgeschriebene Bezeichnung und ordne zu, ob es sich um ein privates oder ein öffentliches Netz handelt.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Abkürzung</th><th style="width:26%">privat oder öffentlich</th><th>Bezeichnung</th></tr>
+      <tr><td class="abk">MAN</td>
+        <td><select id="a4b-man-po" data-a="öffentlich" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-man-bz" data-a="Metropolitan Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">WLAN</td>
+        <td><select id="a4b-wlan-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-wlan-bz" data-a="Wireless LAN" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">SAN</td>
+        <td><select id="a4b-san-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-san-bz" data-a="Storage Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">GAN</td>
+        <td><select id="a4b-gan-po" data-a="öffentlich" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-gan-bz" data-a="Global Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">VPN</td>
+        <td><select id="a4b-vpn-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-vpn-bz" data-a="Virtual Private Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">LPWAN</td>
+        <td><select id="a4b-lpwan-po" data-a="öffentlich" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-lpwan-bz" data-a="Low Power WAN" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">PAN</td>
+        <td><select id="a4b-pan-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-pan-bz" data-a="Personal Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">WAN</td>
+        <td><select id="a4b-wan-po" data-a="öffentlich" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-wan-bz" data-a="Wide Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">VLAN</td>
+        <td><select id="a4b-vlan-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-vlan-bz" data-a="Virtuelles LAN" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+      <tr><td class="abk">LAN</td>
+        <td><select id="a4b-lan-po" data-a="privat" data-o="privat|öffentlich"></select></td>
+        <td><select id="a4b-lan-bz" data-a="Local Area Network" data-o="Global Area Network|Local Area Network|Low Power WAN|Metropolitan Area Network|Personal Area Network|Storage Area Network|Virtual Private Network|Virtuelles LAN|Wide Area Network|Wireless LAN"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+
+  <p class="task"><b>c)</b> Ordne jeder Situation den passenden Netzbereich zu.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Nr.</th><th>Situation</th><th style="width:22%">Netzbereich</th></tr>
+      <tr><td class="nr">1</td><td>Eine Smartwatch überträgt Pulsdaten per Bluetooth an das Smartphone.</td>
+        <td><select id="a4c-1" data-a="PAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">2</td><td>Ein Server hat keine eigenen Festplatten mehr. Seine Daten liegen auf Speichersystemen, die über ein separates, besonders schnelles Netz angebunden sind.</td>
+        <td><select id="a4c-2" data-a="SAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">3</td><td>In einer Arztpraxis sind Empfang, Behandlungsräume und Drucker per Kabel an einem Switch angeschlossen.</td>
+        <td><select id="a4c-3" data-a="LAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">4</td><td>Wasserzähler in Kellern melden einmal täglich wenige Byte über mehrere Kilometer Funkstrecke an den Versorger. Die Batterie wird jahrelang nicht gewechselt.</td>
+        <td><select id="a4c-4" data-a="LPWAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">5</td><td>Beim Bezahlen hält eine Kundin ihr Smartphone kurz an das Kartenterminal.</td>
+        <td><select id="a4c-5" data-a="PAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">6</td><td>Ein Mitarbeiter sitzt im Hotel, nutzt dessen WLAN und arbeitet mit Dateien auf dem Firmenserver, als säße er im Büro. Mitlesen kann dabei niemand.</td>
+        <td><select id="a4c-6" data-a="VPN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">7</td><td>Ein Konzern verbindet seine Niederlassungen in Europa, Asien und Amerika zu einem gemeinsamen Netz.</td>
+        <td><select id="a4c-7" data-a="GAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">8</td><td>Gäste im Besprechungsraum verbinden sich mit demselben Access Point wie die Belegschaft, landen aber in einem abgetrennten Netz ohne Zugriff auf die Firmenserver.</td>
+        <td><select id="a4c-8" data-a="VLAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">9</td><td>Der Router einer Firma ist über einen Glasfaseranschluss mit dem Netz des Providers verbunden.</td>
+        <td><select id="a4c-9" data-a="WAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">10</td><td>Die Stadtwerke verbinden Rathaus, Schwimmbad und Stadtbibliothek über ein eigenes Glasfasernetz im Stadtgebiet.</td>
+        <td><select id="a4c-10" data-a="MAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">11</td><td>Eine Pendlerin geht im Zug über das Mobilfunknetz ins Internet.</td>
+        <td><select id="a4c-11" data-a="WAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+      <tr><td class="nr">12</td><td>Die Tablets in der Lagerhalle sind ohne Kabel mit dem Firmennetz verbunden.</td>
+        <td><select id="a4c-12" data-a="WLAN" data-o="GAN|LAN|LPWAN|MAN|PAN|SAN|VLAN|VPN|WAN|WLAN"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<!-- Aufgabe 4 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 4</span><h2>Das einfache LAN</h2></div>
+
+  <p class="task"><b>a)</b> Ein Router hat einen WAN-Anschluss und einen LAN-Anschluss. Beschreibe, was jeweils daran angeschlossen wird und wozu.</p>
+  <div class="feld gross" contenteditable="true" id="a5a"></div>
+
+  <p class="task"><b>b)</b> In einem Büro reichen die Anschlüsse am Switch nicht mehr aus. Außerdem sollen Laptops und Smartphones ohne Kabel ins Netz. Beschreibe, wie das LAN erweitert werden kann.</p>
+  <div class="feld gross" contenteditable="true" id="a5b"></div>
+</section>
+
+<!-- Aufgabe 5 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 5</span><h2>VLAN</h2></div>
+
+  <p class="task"><b>a)</b> Ein Unternehmen möchte Vertrieb und Einkauf voneinander trennen, ohne neue Kabel zu verlegen. Erkläre, wie ein VLAN das ermöglicht.</p>
+  <div class="feld gross" contenteditable="true" id="a6a"></div>
+
+  <p class="task"><b>b)</b> Vervollständige den Lückentext.</p>
+  <div class="chk">
+    <p class="gap">Damit ein Switch weiß, zu welchem VLAN ein Frame gehört, wird in den Ethernet-Header ein zusätzliches Kennzeichen eingefügt, der
+      <select id="a6b-1" data-a="VLAN-Tag" data-o="Port|VLAN-Tag|Zeitstempel"></select>.
+      Dadurch wird der Frame um
+      <select id="a6b-2" data-a="4 Byte" data-o="4 Byte|8 Byte|16 Byte"></select>
+      größer. Das Kennzeichen enthält eine
+      <select id="a6b-3" data-a="12" data-o="8|12|16"></select>-Bit-Zahl zur Unterscheidung der VLANs. Die Verbindungsleitung zwischen zwei Switches, über die Frames mehrerer VLANs laufen, heißt
+      <select id="a6b-4" data-a="VLAN-Trunk" data-o="Patchkabel|VPN-Tunnel|VLAN-Trunk"></select>.</p>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+
+  <p class="task"><b>c)</b> In wie viele VLANs kann man ein Netzwerk aufteilen? Begründe deine Antwort.</p>
+  <div class="feld" contenteditable="true" id="a6c"></div>
+
+  <p class="task"><b>d)</b> Entscheide für jede Teilstrecke, ob dort getaggte oder ungetaggte Frames übertragen werden.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Nr.</th><th>Teilstrecke</th><th style="width:22%">Frames</th></tr>
+      <tr><td class="nr">1</td><td>Switch im Erdgeschoss zu Switch im ersten Stock</td>
+        <td><select id="a6d-1" data-a="getaggt" data-o="getaggt|ungetaggt"></select></td></tr>
+      <tr><td class="nr">2</td><td>PC aus dem Vertrieb zum Switch</td>
+        <td><select id="a6d-2" data-a="ungetaggt" data-o="getaggt|ungetaggt"></select></td></tr>
+      <tr><td class="nr">3</td><td>Netzwerkdrucker des Einkaufs zum Switch</td>
+        <td><select id="a6d-3" data-a="ungetaggt" data-o="getaggt|ungetaggt"></select></td></tr>
+      <tr><td class="nr">4</td><td>Switch zum Switch im Nachbargebäude, über den Vertrieb und Einkauf laufen</td>
+        <td><select id="a6d-4" data-a="getaggt" data-o="getaggt|ungetaggt"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<!-- Aufgabe 6 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 6</span><h2>VPN</h2></div>
+
+  <p class="task"><b>a)</b> Beschreibe in eigenen Worten, was beim IP-Tunneling mit einem Datenpaket auf dem Weg vom Absender zum Empfänger passiert.</p>
+  <div class="feld gross" contenteditable="true" id="a7a"></div>
+
+  <p class="task"><b>b)</b> Ordne jeder Situation die passende VPN-Art zu.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Nr.</th><th>Situation</th><th style="width:24%">VPN-Art</th></tr>
+      <tr><td class="nr">1</td><td>Eine Mitarbeiterin arbeitet von zu Hause und greift auf den Dateiserver der Firma zu.</td>
+        <td><select id="a7b-1" data-a="End-to-Site" data-o="End-to-End|End-to-Site|Site-to-Site"></select></td></tr>
+      <tr><td class="nr">2</td><td>Eine Zweigstelle in Mainz wird dauerhaft mit dem Netz der Hauptniederlassung verbunden.</td>
+        <td><select id="a7b-2" data-a="Site-to-Site" data-o="End-to-End|End-to-Site|Site-to-Site"></select></td></tr>
+      <tr><td class="nr">3</td><td>Zwei Freunde verbinden ihre Gaming-PCs sicher miteinander.</td>
+        <td><select id="a7b-3" data-a="End-to-End" data-o="End-to-End|End-to-Site|Site-to-Site"></select></td></tr>
+      <tr><td class="nr">4</td><td>Ein Vertriebsmitarbeiter ruft beim Kunden vor Ort Preislisten aus dem Firmennetz ab.</td>
+        <td><select id="a7b-4" data-a="End-to-Site" data-o="End-to-End|End-to-Site|Site-to-Site"></select></td></tr>
+      <tr><td class="nr">5</td><td>Mehrere Filialen einer Handelskette werden mit der Zentrale verbunden.</td>
+        <td><select id="a7b-5" data-a="Site-to-Site" data-o="End-to-End|End-to-Site|Site-to-Site"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<!-- Aufgabe 7 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 7</span><h2>Wahr oder falsch?</h2></div>
+  <p>Entscheide, ob die Aussage wahr oder falsch ist.</p>
+  <div class="chk">
+    <div class="scroll">
+    <table>
+      <tr><th>Nr.</th><th>Aussage</th><th style="width:18%">wahr oder falsch</th></tr>
+      <tr><td class="nr">1</td><td>Wer Daten durch einen VPN-Tunnel schickt, schützt sie davor, unterwegs mitgelesen oder manipuliert zu werden.</td>
+        <td><select id="a8-1" data-a="wahr" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">2</td><td>Mit einem VLAN wird ein Server im Firmennetz von außen über das Internet erreichbar.</td>
+        <td><select id="a8-2" data-a="falsch" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">3</td><td>Die Begriffe Trunk und Cloud meinen dasselbe.</td>
+        <td><select id="a8-3" data-a="falsch" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">4</td><td>Auch zwischen genau zwei einzelnen Rechnern lässt sich ein VPN aufbauen.</td>
+        <td><select id="a8-4" data-a="wahr" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">5</td><td>Wählt sich eine Mitarbeiterin von zu Hause ins Firmennetz ein, handelt es sich meist um ein Site-to-Site-VPN.</td>
+        <td><select id="a8-5" data-a="falsch" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">6</td><td>Will ein Außendienstler von unterwegs sicher auf einen Server im Firmen-LAN zugreifen, ist ein VPN der passende Weg.</td>
+        <td><select id="a8-6" data-a="wahr" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">7</td><td>Pakete mit privaten IP-Adressen werden im Internet weitergeleitet.</td>
+        <td><select id="a8-7" data-a="falsch" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">8</td><td>Ein VPN kann ganze Standortnetze miteinander koppeln, nicht nur einzelne Rechner.</td>
+        <td><select id="a8-8" data-a="wahr" data-o="wahr|falsch"></select></td></tr>
+      <tr><td class="nr">9</td><td>Für ein VLAN muss für jede Abteilung eine eigene Verkabelung verlegt werden.</td>
+        <td><select id="a8-9" data-a="falsch" data-o="wahr|falsch"></select></td></tr>
+    </table>
+    </div>
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<!-- Aufgabe 8 -->
+<section class="card">
+  <div class="head"><span class="num">Aufgabe 8</span><h2>Anwenden</h2></div>
+  <p>Folgende Kunden schildern ihr Problem. Keiner nennt eine Lösung.</p>
+  <p>Ordne jeder Anfrage den passenden Netzwerkbereich zu und begründe deine Zuordnung.</p>
+  <div class="chk">
+
+    <div class="quote"><span class="who">Anfrage 1</span>„Unser Praktikant kommt an die Personalakten, das wollen wir nicht. Beide sitzen im gleichen Netz.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-1-z" data-a="VLAN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-1-b"></div></div>
+    </div>
+
+    <div class="quote"><span class="who">Anfrage 2</span>„Der Außendienst kann unterwegs nicht auf das Laufwerk zugreifen.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-2-z" data-a="VPN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-2-b"></div></div>
+    </div>
+
+    <div class="quote"><span class="who">Anfrage 3</span>„Der Kunde im Besprechungsraum will WLAN, soll aber nichts von uns sehen.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-3-z" data-a="VLAN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-3-b"></div></div>
+    </div>
+
+    <div class="quote"><span class="who">Anfrage 4</span>„Zwei Rechner im gleichen Büro sollen Dateien tauschen, mehr nicht.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-4-z" data-a="LAN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-4-b"></div></div>
+    </div>
+
+    <div class="quote"><span class="who">Anfrage 5</span>„Wir haben ein zweites Büro in Mainz angemietet. Die Buchhaltung sitzt dort, der Rest hier. Die Buchhalterinnen sollen an beiden Standorten auf denselben Server zugreifen und der Vertrieb soll weiterhin nichts von deren Daten sehen.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-5-z" data-a="VLAN und VPN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-5-b"></div></div>
+    </div>
+
+    <div class="quote"><span class="who">Anfrage 6</span>„Wir bauen eine neue Produktionshalle. Dort stehen Maschinensteuerungen, ein WLAN für die Tablets der Werker und zwei Büroarbeitsplätze. Alles hängt an einem Switch. Der Hersteller wartet die Maschinen aus der Ferne.“</div>
+    <div class="grid2">
+      <div><div class="lbl">Netzwerkbereich</div><select id="a9-6-z" data-a="VLAN und VPN" data-o="LAN|VLAN|VLAN und VPN|VPN|WAN"></select></div>
+      <div><div class="lbl">Begründung</div><div class="feld" contenteditable="true" id="a9-6-b"></div></div>
+    </div>
+
+    <div class="checkrow"><button type="button" class="check">Prüfen</button><span class="result"></span></div>
+  </div>
+</section>
+
+<div class="printbar"><button type="button" class="print" id="btn-print">PDF speichern</button></div>
+
+</div>
+
+<script>
+(function(){
+  /* Auswahllisten aus data-o aufbauen */
+  Array.prototype.forEach.call(document.querySelectorAll('select[data-o]'), function(sel){
+    var leer = document.createElement('option');
+    leer.value = ''; leer.textContent = 'bitte wählen';
+    sel.appendChild(leer);
+    sel.getAttribute('data-o').split('|').forEach(function(t){
+      var o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      sel.appendChild(o);
+    });
+  });
+
+  /* Prüfen erst auf Klick */
+  Array.prototype.forEach.call(document.querySelectorAll('.chk'), function(box){
+    var btn = box.querySelector('button.check');
+    var out = box.querySelector('.result');
+    var sels = box.querySelectorAll('select[data-a]');
+    btn.addEventListener('click', function(){
+      var ok = 0;
+      Array.prototype.forEach.call(sels, function(s){
+        s.classList.remove('ok', 'bad');
+        if (!s.value) { return; }
+        if (s.value === s.getAttribute('data-a')) { s.classList.add('ok'); ok++; }
+        else { s.classList.add('bad'); }
+      });
+      out.textContent = ok + ' von ' + sels.length + ' richtig';
+      out.classList.toggle('all-ok', ok === sels.length);
+    });
+    Array.prototype.forEach.call(sels, function(s){
+      s.addEventListener('change', function(){ s.classList.remove('ok', 'bad'); });
+    });
+  });
+
+  /* Freitextfelder: nur reiner Text, Zeilenumbruch als \n */
+  Array.prototype.forEach.call(document.querySelectorAll('.feld[contenteditable="true"]'), function(f){
+    f.addEventListener('paste', function(e){
+      e.preventDefault();
+      var t = (e.clipboardData || window.clipboardData).getData('text');
+      document.execCommand('insertText', false, t);
+    });
+    f.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); document.execCommand('insertText', false, '\n'); }
+    });
+    f.addEventListener('input', function(){
+      if (f.textContent === '' && f.innerHTML !== '') { f.innerHTML = ''; }
+    });
+  });
+
+  document.getElementById('btn-print').addEventListener('click', function(){ window.print(); });
+})();
+</script>
+
+<!-- vt-speicher -->
+<style>
+.vt-tools{max-width:940px;margin:8px auto 40px;padding:0 18px;text-align:center}
+.vt-tools button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:9px 16px;border:1px solid var(--ink-2);background:transparent;color:var(--ink-2);cursor:pointer}
+.vt-tools button:hover{background:rgba(128,128,128,.16)}
+@media print{.vt-tools{display:none}}
+</style>
+<div class="vt-tools"><button type="button" id="vt-wipe">Alle Eingaben löschen</button></div>
+<script>
+(function(){
+  var PREFIX = 'firmennetzwerke-lf3:';
+  var EXCLUDE = '';
+  var TOGGLES = '';
+  var WIPE_ID = '';
+  var store = null;
+  try { store = window.localStorage; store.setItem(PREFIX + '__t', '1'); store.removeItem(PREFIX + '__t'); }
+  catch (e) { store = null; }
+  if (!store) { return; }
+
+  /* Felder bei jedem Zugriff frisch einsammeln, weil Blaetter Teile neu aufbauen koennen */
+  function collect(){
+    var out = [];
+    var idx = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('input, textarea, select, [contenteditable="true"]'), function(el){
+      var t = (el.type || '').toLowerCase();
+      if (el.tagName === 'INPUT' && /^(button|submit|reset|password|file|hidden|image)$/.test(t)) { return; }
+      if (EXCLUDE && el.matches(EXCLUDE)) { return; }
+      if (el.closest('.vt-tools')) { return; }
+      var key = el.id ? 'id:' + el.id : 'n' + idx;
+      idx++;
+      out.push({ el: el, key: PREFIX + key, kind: (t === 'checkbox' || t === 'radio') ? 'check' : (el.isContentEditable ? 'rich' : 'value') });
+    });
+    return out;
+  }
+  function collectToggles(){
+    return TOGGLES ? Array.prototype.map.call(document.querySelectorAll(TOGGLES), function(el, i){
+      return { el: el, key: PREFIX + 'tg' + i };
+    }) : [];
+  }
+
+  function read(f){
+    if (f.kind === 'check') { return f.el.checked ? '1' : ''; }
+    if (f.kind === 'rich') { return f.el.textContent; }
+    return f.el.value;
+  }
+  function fire(el, type){
+    el.dispatchEvent(new Event(type, { bubbles: true }));
+  }
+
+  collect().forEach(function(f){
+    var saved = null;
+    try { saved = store.getItem(f.key); } catch (e) {}
+    if (saved === null) { return; }
+    if (f.kind === 'check') { f.el.checked = (saved === '1'); fire(f.el, 'change'); }
+    else if (f.kind === 'rich') { f.el.textContent = saved; fire(f.el, 'input'); }
+    else {
+      f.el.value = saved;
+      fire(f.el, f.el.tagName === 'SELECT' ? 'change' : 'input');
+    }
+  });
+  collectToggles().forEach(function(t){
+    var saved = null;
+    try { saved = store.getItem(t.key); } catch (e) {}
+    if (saved !== null && t.el.getAttribute('aria-pressed') !== saved) { t.el.click(); }
+  });
+
+  var wiping = false;
+  var timer = null;
+  function save(){
+    if (wiping) { return; }
+    collect().forEach(function(f){
+      var val = read(f);
+      try {
+        if (val && String(val).trim()) { store.setItem(f.key, val); } else { store.removeItem(f.key); }
+      } catch (e) {}
+    });
+    collectToggles().forEach(function(t){
+      try {
+        if (t.el.getAttribute('aria-pressed') === 'true') { store.setItem(t.key, 'true'); } else { store.removeItem(t.key); }
+      } catch (e) {}
+    });
+  }
+  function queue(){
+    if (timer) { clearTimeout(timer); }
+    timer = setTimeout(save, 400);
+  }
+  document.addEventListener('input', queue, true);
+  document.addEventListener('change', queue, true);
+  if (TOGGLES) { document.addEventListener('click', queue, true); }
+  window.addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') { save(); } });
+
+  function dropAll(){
+    for (var i = store.length - 1; i >= 0; i--) {
+      var k = store.key(i);
+      if (k && k.indexOf(PREFIX) === 0) { try { store.removeItem(k); } catch (e) {} }
+    }
+  }
+
+  if (WIPE_ID) {
+    /* vorhandener Zuruecksetzen-Button: nach seinem Handler den Speicher angleichen */
+    var own = document.getElementById(WIPE_ID);
+    if (own) { own.addEventListener('click', function(){ if (timer) { clearTimeout(timer); } save(); }); }
+    return;
+  }
+  var wipe = document.getElementById('vt-wipe');
+  if (wipe) {
+    wipe.addEventListener('click', function(){
+      if (!window.confirm('Wirklich alle Eingaben auf diesem Blatt löschen?')) { return; }
+      wiping = true;
+      if (timer) { clearTimeout(timer); }
+      dropAll();
+      /* Felder leeren, sonst stellt Firefox sie beim Neuladen wieder her */
+      collect().forEach(function(f){
+        try {
+          if (f.kind === 'check') { f.el.checked = false; }
+          else if (f.kind === 'rich') { f.el.textContent = ''; }
+          else if (f.el.tagName === 'SELECT') { f.el.selectedIndex = 0; }
+          else { f.el.value = ''; }
+        } catch (e) {}
+      });
+      window.location.reload();
+    });
+  }
+})();
+</script>
+</body>
+</html>
